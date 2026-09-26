@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-gitops-pipeline
+  labels:
+    app: secure-gitops-pipeline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secure-gitops-pipeline
+  template:
+    metadata:
+      labels:
+        app: secure-gitops-pipeline
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: secure-gitops-pipeline
+          # Ce nom "myapp" est un placeholder : il est remplacé par
+          # `kustomize edit set image myapp=<registry>:<tag>` (via le CI)
+          # ou par l'entrée `images:` de base/kustomization.yaml.
+          image: myapp
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: APP_NAME
+              value: secure-gitops-pipeline
+            - name: PORT
+              value: "8080"
+          # Liveness : redémarre le pod si le process ne répond plus
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          # Readiness : retire le pod du Service sans le redémarrer
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: secure-gitops-pipeline-prod
+
+resources:
+  - ../../base
+
+patches:
+  - path: patch-replicas.yaml
+    target:
+      kind: Deployment
+      name: secure-gitops-pipeline
+  - path: patch-resources.yaml
+    target:
+      kind: Deployment
+      name: secure-gitops-pipeline
+
+labels:
+  - pairs:
+      environment: prod
+    includeSelectors: true
+
+# Mis à jour manuellement via Pull Request une fois le tag validé en dev
+# (jamais directement par le CI — voir US 3.4 du cahier des charges)
+images:
+  - name: myapp
+    newName: ghcr.io/khaoula-dr/secure-gitops-pipeline
+    newTag: latest
