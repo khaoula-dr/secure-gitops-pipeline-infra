@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: secure-gitops-pipeline-dev
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/khaoula-dr/secure-gitops-pipeline-infra.git
+    targetRevision: main
+    path: overlays/dev
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: secure-gitops-pipeline-dev
+
+  syncPolicy:
+    automated:
+      prune: true       # supprime du cluster ce qui est retiré de Git
+      selfHeal: true     # corrige automatiquement le drift
+    syncOptions:
+      - CreateNamespace=true   # crée le namespace secure-gitops-pipeline-dev s'il n'existe pas
