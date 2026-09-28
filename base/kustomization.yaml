@@ -4,8 +4,3 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - service.yaml
-
-images:
-  - name: myapp
-    newName: ghcr.io/khaoula-dr/secure-gitops-pipeline
-    newTag: latest   # écrasé par `kustomize edit set image` dans les overlays
