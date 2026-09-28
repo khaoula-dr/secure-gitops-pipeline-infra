@@ -4,26 +4,26 @@ kind: Kustomization
 namespace: secure-gitops-pipeline-prod
 
 resources:
-  - ../../base
+- ../../base
 
 patches:
-  - path: patch-replicas.yaml
-    target:
-      kind: Deployment
-      name: secure-gitops-pipeline
-  - path: patch-resources.yaml
-    target:
-      kind: Deployment
-      name: secure-gitops-pipeline
+- path: patch-replicas.yaml
+  target:
+    kind: Deployment
+    name: secure-gitops-pipeline
+- path: patch-resources.yaml
+  target:
+    kind: Deployment
+    name: secure-gitops-pipeline
 
 labels:
-  - pairs:
-      environment: prod
-    includeSelectors: true
+- includeSelectors: true
+  pairs:
+    environment: prod
 
 # Mis à jour manuellement via Pull Request une fois le tag validé en dev
 # (jamais directement par le CI — voir US 3.4 du cahier des charges)
 images:
-  - name: myapp
-    newName: ghcr.io/khaoula-dr/secure-gitops-pipeline
-    newTag: latest
+- name: myapp
+  newName: ghcr.io/khaoula-dr/secure-gitops-pipeline
+  newTag: 4cd84cf
