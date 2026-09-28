@@ -16,6 +16,7 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
+        runAsUser: 100
       containers:
         - name: secure-gitops-pipeline
           # Ce nom "myapp" est un placeholder : il est remplacé par
