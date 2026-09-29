@@ -14,15 +14,14 @@ spec:
       labels:
         app: secure-gitops-pipeline
     spec:
+      automountServiceAccountToken: false  # AJOUT — l'app n'a pas besoin de parler à l'API K8s
       securityContext:
         runAsNonRoot: true
-        runAsUser: 100
+        runAsUser: 10001
       containers:
         - name: secure-gitops-pipeline
-          # Ce nom "myapp" est un placeholder : il est remplacé par
-          # `kustomize edit set image myapp=<registry>:<tag>` (via le CI)
-          # ou par l'entrée `images:` de base/kustomization.yaml.
           image: myapp
+          imagePullPolicy: Always  # AJOUT — toujours retirer une image fraîche pour ce tag
           ports:
             - name: http
               containerPort: 8080
@@ -31,14 +30,12 @@ spec:
               value: secure-gitops-pipeline
             - name: PORT
               value: "8080"
-          # Liveness : redémarre le pod si le process ne répond plus
           livenessProbe:
             httpGet:
               path: /health
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
-          # Readiness : retire le pod du Service sans le redémarrer
           readinessProbe:
             httpGet:
               path: /ready
@@ -56,3 +53,5 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
+            seccompProfile:      # AJOUT
+              type: RuntimeDefault  # AJOUT
