@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: secure-gitops-pipeline-dev
 resources:
 - ../../base
+- sealed-secret-app.yaml
 patches:
 - path: patch-replicas.yaml
   target:
@@ -14,7 +15,6 @@ labels:
     environment: dev
 # Ce bloc est ajouté/mis à jour automatiquement par le CI via :
 #   kustomize edit set image myapp=ghcr.io/khaoula-dr/secure-gitops-pipeline:<sha>
-# Laissez-le vide (ou absent) au premier commit — le CI le remplira au premier run.
 images:
 - name: myapp
   newName: ghcr.io/khaoula-dr/secure-gitops-pipeline

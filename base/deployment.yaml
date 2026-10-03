@@ -14,14 +14,14 @@ spec:
       labels:
         app: secure-gitops-pipeline
     spec:
-      automountServiceAccountToken: false  # AJOUT — l'app n'a pas besoin de parler à l'API K8s
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
       containers:
         - name: secure-gitops-pipeline
           image: myapp
-          imagePullPolicy: Always  # AJOUT — toujours retirer une image fraîche pour ce tag
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
@@ -30,6 +30,11 @@ spec:
               value: secure-gitops-pipeline
             - name: PORT
               value: "8080"
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: API_KEY
           livenessProbe:
             httpGet:
               path: /health
@@ -53,5 +58,5 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-            seccompProfile:      # AJOUT
-              type: RuntimeDefault  # AJOUT
+            seccompProfile:
+              type: RuntimeDefault

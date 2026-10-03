@@ -5,6 +5,7 @@ namespace: secure-gitops-pipeline-prod
 
 resources:
 - ../../base
+- sealed-secret-app.yaml
 
 patches:
 - path: patch-replicas.yaml
