@@ -1,0 +1,49 @@
+name: Promote dev to prod (PR)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  promote:
+    name: Open PR to promote dev tag to prod
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Extract current dev image tag
+        id: dev_tag
+        run: |
+          TAG=$(kustomize build overlays/dev | grep "image: ghcr.io" | head -1 | sed -E 's/.*:([a-f0-9]+)$/\1/')
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Tag dev détecté : $TAG"
+
+      - name: Set prod image tag via Kustomize
+        working-directory: overlays/prod
+        run: |
+          kustomize edit set image myapp=ghcr.io/khaoula-dr/secure-gitops-pipeline:${{ steps.dev_tag.outputs.tag }}
+
+      - name: Verify prod manifest builds
+        run: kustomize build overlays/prod > /dev/null
+
+      - name: Open Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: promote-prod-${{ steps.dev_tag.outputs.tag }}
+          title: "chore: promote image ${{ steps.dev_tag.outputs.tag }} to prod"
+          body: |
+            Promotion manuelle du tag validé en dev vers prod.
+
+            **Tag source (dev)** : `${{ steps.dev_tag.outputs.tag }}`
+
+            Après merge, synchroniser manuellement l'Application ArgoCD `secure-gitops-pipeline-prod` (sync policy manuelle par design).
+          commit-message: "chore: promote image ${{ steps.dev_tag.outputs.tag }} to prod"
+          add-paths: overlays/prod/kustomization.yaml
