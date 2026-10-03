@@ -27,4 +27,4 @@ labels:
 images:
 - name: myapp
   newName: ghcr.io/khaoula-dr/secure-gitops-pipeline
-  newTag: 4cd84cf
+  newTag: 138ee9b
