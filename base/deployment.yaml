@@ -30,11 +30,10 @@ spec:
               value: secure-gitops-pipeline
             - name: PORT
               value: "8080"
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: app-secret
-                  key: API_KEY
+          volumeMounts:
+            - name: api-key-secret
+              mountPath: /etc/secrets
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /health
@@ -60,3 +59,7 @@ spec:
               drop: ["ALL"]
             seccompProfile:
               type: RuntimeDefault
+      volumes:
+        - name: api-key-secret
+          secret:
+            secretName: app-secret
